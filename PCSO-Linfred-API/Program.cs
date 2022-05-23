@@ -1,4 +1,6 @@
 
+using PCSO_Linfred_API;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); 
@@ -6,14 +8,19 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseHttpsRedirection(); 
+app.UseHttpsRedirection();
 
+MessageManager messageManager = new MessageManager();
 
 app.MapGet("Hello", () => "Hello from dotnet six API");
 app.MapGet("Product", () => "Get some Product from AZURE SQL");
 
-app.MapPost("Product", (Product p) => "Product saved in SQL");
-app.MapPost("Chat", (Message msg) => "Message posted to chat SQL");
+app.MapPost("Product", (Product p) => "");
+app.MapDelete("Product", (string name) => "Deleted");
+
+app.MapGet("Chat", () => messageManager?.Messages);
+app.MapPost("Chat", (Message msg) => messageManager?.Messages?.Add(msg));
+
 
 app.Run();
 
