@@ -19,8 +19,10 @@ jobs:
     
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
-              dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: |
+          cd .\pcso-linfred-api
+          dotnet build -c Release
+          dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
