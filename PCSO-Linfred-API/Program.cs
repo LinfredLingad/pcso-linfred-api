@@ -1,30 +1,82 @@
 
-using PCSO_Linfred_API;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(); 
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-MessageManager messageManager = new MessageManager();
+app.MapGet("/", () => "Hello World!");
 
-app.MapGet("Hello", () => "Hello from dotnet six API");
-app.MapGet("Product", () => "Get some Product from AZURE SQL");
+app.MapGet("/todoitems", async (TodoDb db) =>
+    await db.Todos.ToListAsync());
 
-app.MapPost("Product", (Product p) => "");
-app.MapDelete("Product", (string name) => "Deleted");
+app.MapGet("/todoitems/complete", async (TodoDb db) =>
+    await db.Todos.Where(t => t.IsComplete).ToListAsync());
 
-app.MapGet("Chat", () => messageManager?.Messages);
-app.MapPost("Chat", (Message msg) => messageManager?.Messages?.Add(msg));
+app.MapGet("/todoitems/{id}", async (int id, TodoDb db) =>
+    await db.Todos.FindAsync(id)
+        is Todo todo
+            ? Results.Ok(todo)
+            : Results.NotFound());
 
+app.MapPost("/todoitems", async (Todo todo, TodoDb db) =>
+{
+    db.Todos.Add(todo);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/todoitems/{todo.Id}", todo);
+});
+
+app.MapPut("/todoitems/{id}", async (int id, Todo inputTodo, TodoDb db) =>
+{
+    var todo = await db.Todos.FindAsync(id);
+
+    if (todo is null) return Results.NotFound();
+
+    todo.Name = inputTodo.Name;
+    todo.IsComplete = inputTodo.IsComplete;
+
+    await db.SaveChangesAsync();
+
+    return Results.NoContent();
+});
+
+app.MapDelete("/todoitems/{id}", async (int id, TodoDb db) =>
+{
+    if (await db.Todos.FindAsync(id) is Todo todo)
+    {
+        db.Todos.Remove(todo);
+        await db.SaveChangesAsync();
+        return Results.Ok(todo);
+    }
+
+    return Results.NotFound();
+});
 
 app.Run();
 
-// Some Data Contracts
-public record class Message(string Name, string Msg);
-public record class Product(string Name, string Picture, int Price);
+class Todo
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
+    public bool IsComplete { get; set; }
+    public string? Message { get; set; }
+    public DateTime? Created { get; set; }
+}
+
+class TodoDb : DbContext
+{
+    public TodoDb(DbContextOptions<TodoDb> options)
+        : base(options) { }
+
+    public DbSet<Todo> Todos => Set<Todo>();
+}
 
