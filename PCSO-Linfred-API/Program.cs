@@ -75,6 +75,12 @@ app.MapDelete("/todoitems", async (TodoDb db) =>
     return Results.Ok;
 });
 
+app.MapDelete("/todoitems", async (TodoDb db) =>
+{
+    await db.Database.EnsureDeletedAsync();
+    await db.SaveChangesAsync();
+    return Results.Ok(null);
+});
 
 app.Run();
 
