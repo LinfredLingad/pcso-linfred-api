@@ -20,6 +20,14 @@ namespace PCSO_Linfred_API.Controllers
             return await _context.Offices.ToListAsync();
         }
 
+
+        [HttpGet("Officer/{officeId}")]
+        public async Task<ActionResult<IEnumerable<Office>>> GetOfficesByOfficeID(int officeId)
+        {
+            return await _context.Offices.Where(s=> s.officeId == officeId).ToListAsync();
+        }
+
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Office>> GetOffices(int id)
         {
@@ -30,6 +38,7 @@ namespace PCSO_Linfred_API.Controllers
             }
             return officeList;
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOffices(int id, Office offices)
