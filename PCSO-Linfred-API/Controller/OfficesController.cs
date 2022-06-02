@@ -69,8 +69,18 @@ namespace PCSO_Linfred_API.Controllers
         {
             _context.Offices.Add(office);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetOffice", new { id = office.id }, office);
+            return CreatedAtAction("GetOffices", new { id = office.id }, office);
         }
+
+        //[HttpPost]
+        //public async Task<ActionResult<Application>> PostApplications(Application application)
+        //{
+        //    _dataContext.Applications.Add(application);
+        //    await _dataContext.SaveChangesAsync();
+        //    return CreatedAtAction("GetApplications", new { id = application.applicantID }, application);
+        //}
+      
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOffice(int id)
